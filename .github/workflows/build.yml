@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: brew install ldid
@@ -30,6 +30,7 @@ jobs:
           rm -rf ${{ github.workspace }}/theos/sdks
           git clone --depth=1 https://github.com/theos/sdks.git ${{ github.workspace }}/theos/sdks
           git clone --depth=1 https://github.com/PoomSmart/YouTubeHeader.git ${{ github.workspace }}/theos/include/YouTubeHeader
+          git clone --depth=1 https://github.com/PoomSmart/PSHeader.git ${{ github.workspace }}/theos/include/PSHeader
 
       - name: Compile and Package
         env:
