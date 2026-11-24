@@ -24,11 +24,12 @@ jobs:
       - name: Install dependencies
         run: brew install ldid
 
-      - name: Setup Theos and iOS SDKs
+      - name: Setup Theos, SDKs, and Headers
         run: |
           git clone --recursive https://github.com/theos/theos.git ${{ github.workspace }}/theos
           rm -rf ${{ github.workspace }}/theos/sdks
           git clone --depth=1 https://github.com/theos/sdks.git ${{ github.workspace }}/theos/sdks
+          git clone --depth=1 https://github.com/PoomSmart/YouTubeHeader.git ${{ github.workspace }}/theos/include/YouTubeHeader
 
       - name: Compile and Package
         env:
@@ -38,18 +39,18 @@ jobs:
           make package THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1
           
           mkdir -p output
-          find .theos/obj -name "YBackgroundOnly.dylib" -exec cp {} output/ \;
+          find .theos/obj -name "YouSlider.dylib" -exec cp {} output/ \;
           cp packages/*.deb output/
           
           cd output
-          zip -j YBackgroundOnly.dylib.zip YBackgroundOnly.dylib
-          zip -j YBackgroundOnly.deb.zip *.deb
-          rm -f YBackgroundOnly.dylib *.deb
+          zip -j YouSlider.dylib.zip YouSlider.dylib
+          zip -j YouSlider.deb.zip *.deb
+          rm -f YouSlider.dylib *.deb
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: YBackgroundOnly-Release-Zips
+          name: YouSlider-Release-Zips
           path: output/*.zip
 
       - name: Create Release and Upload Assets
