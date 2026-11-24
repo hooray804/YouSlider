@@ -1,4 +1,7 @@
 #import <PSHeader/Misc.h>
+#import <UIKit/UIKit.h>
+#import <UIKit/UIImage+Private.h>
+#import <YouTubeHeader/UIColor+YouTube.h>
 #import <YouTubeHeader/YTAlertView.h>
 #import <YouTubeHeader/YTSettingsGroupData.h>
 #import <YouTubeHeader/YTSettingsPickerViewController.h>
@@ -6,9 +9,6 @@
 #import <YouTubeHeader/YTSettingsSectionItemManager.h>
 #import <YouTubeHeader/YTSettingsViewController.h>
 #import <YouTubeHeader/YTUIUtils.h>
-#import <YouTubeHeader/UIColor+YouTube.h>
-#import <UIKit/UIImage+Private.h>
-#import "Alderis.h"
 #import "Settings.h"
 
 #define _LOC(b, x) [b localizedStringForKey:x value:nil table:nil]
@@ -20,7 +20,6 @@ static const NSInteger TweakSection = 'ytsl';
 - (void)updateYouSliderSectionWithEntry:(id)entry;
 @end
 
-extern UIColor *scrubberUIColor();
 extern UIColor *scrubberUIColor();
 extern UIColor *liveScrubberUIColor();
 extern UIColor *sliderUIColor();
@@ -109,20 +108,20 @@ NSBundle *TweakBundle() {
 
 %hook YTSettingsSectionItemManager
 
-%new(v@:@@)
-- (void)colorPicker:(HBColorPickerViewController *)colorPicker didSelectColor:(UIColor *)color {
+%new(v@:@)
+- (void)colorPickerViewControllerDidSelectColor:(UIColorPickerViewController *)viewController {
     NSString *key;
-    if ([colorPicker.title isEqualToString:@"Slider"])
+    if ([viewController.title isEqualToString:@"Slider"])
         key = SliderColorValueKey;
-    else if ([colorPicker.title isEqualToString:@"Live Slider"])
+    else if ([viewController.title isEqualToString:@"Live Slider"])
         key = LiveSliderColorValueKey;
-    else if ([colorPicker.title isEqualToString:@"Scrubber"])
+    else if ([viewController.title isEqualToString:@"Scrubber"])
         key = ScrubberImageColorValueKey;
-    else if ([colorPicker.title isEqualToString:@"Live Scrubber"])
+    else if ([viewController.title isEqualToString:@"Live Scrubber"])
         key = LiveScrubberImageColorValueKey;
     else
         return;
-    NSString *hex = [color LOT_hexStringValue];
+    NSString *hex = [viewController.selectedColor LOT_hexStringValue];
     [[NSUserDefaults standardUserDefaults] setObject:hex forKey:key];
     NotifyYouSliderSettingsChanged();
     YTSettingsViewController *settingsViewController = [self valueForKey:@"_settingsViewControllerDelegate"];
@@ -171,14 +170,12 @@ NSBundle *TweakBundle() {
             return GetSliderColor();
         }
         selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-            HBColorPickerViewController *picker = [HBColorPickerViewController new];
+            UIColorPickerViewController *picker = [UIColorPickerViewController new];
             picker.title = @"Slider";
-            picker.delegate = (NSObject <HBColorPickerDelegate> *)self;
+            picker.delegate = (id<UIColorPickerViewControllerDelegate>)self;
             picker.popoverPresentationController.sourceView = cell;
-            UIColor *color = sliderUIColor();
-            HBColorPickerConfiguration *config = [[HBColorPickerConfiguration alloc] initWithColor:color];
-            config.supportsAlpha = NO;
-            picker.configuration = config;
+            picker.selectedColor = sliderUIColor() ?: [UIColor redColor];
+            picker.supportsAlpha = NO;
             [[%c(YTUIUtils) topViewControllerForPresenting] presentViewController:picker animated:YES completion:nil];
             return YES;
         }];
@@ -192,14 +189,12 @@ NSBundle *TweakBundle() {
             return GetLiveSliderColor();
         }
         selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-            HBColorPickerViewController *picker = [HBColorPickerViewController new];
+            UIColorPickerViewController *picker = [UIColorPickerViewController new];
             picker.title = @"Live Slider";
-            picker.delegate = (NSObject <HBColorPickerDelegate> *)self;
+            picker.delegate = (id<UIColorPickerViewControllerDelegate>)self;
             picker.popoverPresentationController.sourceView = cell;
-            UIColor *color = liveSliderUIColor();
-            HBColorPickerConfiguration *config = [[HBColorPickerConfiguration alloc] initWithColor:color];
-            config.supportsAlpha = NO;
-            picker.configuration = config;
+            picker.selectedColor = liveSliderUIColor() ?: [UIColor redColor];
+            picker.supportsAlpha = NO;
             [[%c(YTUIUtils) topViewControllerForPresenting] presentViewController:picker animated:YES completion:nil];
             return YES;
         }];
@@ -226,14 +221,12 @@ NSBundle *TweakBundle() {
             return GetScrubberColor();
         }
         selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-            HBColorPickerViewController *picker = [HBColorPickerViewController new];
+            UIColorPickerViewController *picker = [UIColorPickerViewController new];
             picker.title = @"Scrubber";
-            picker.delegate = (NSObject <HBColorPickerDelegate> *)self;
+            picker.delegate = (id<UIColorPickerViewControllerDelegate>)self;
             picker.popoverPresentationController.sourceView = cell;
-            UIColor *color = scrubberUIColor();
-            HBColorPickerConfiguration *config = [[HBColorPickerConfiguration alloc] initWithColor:color];
-            config.supportsAlpha = NO;
-            picker.configuration = config;
+            picker.selectedColor = scrubberUIColor() ?: [UIColor redColor];
+            picker.supportsAlpha = NO;
             [[%c(YTUIUtils) topViewControllerForPresenting] presentViewController:picker animated:YES completion:nil];
             return YES;
         }];
@@ -247,14 +240,12 @@ NSBundle *TweakBundle() {
             return GetLiveScrubberColor();
         }
         selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-            HBColorPickerViewController *picker = [HBColorPickerViewController new];
+            UIColorPickerViewController *picker = [UIColorPickerViewController new];
             picker.title = @"Live Scrubber";
-            picker.delegate = (NSObject <HBColorPickerDelegate> *)self;
+            picker.delegate = (id<UIColorPickerViewControllerDelegate>)self;
             picker.popoverPresentationController.sourceView = cell;
-            UIColor *color = liveScrubberUIColor();
-            HBColorPickerConfiguration *config = [[HBColorPickerConfiguration alloc] initWithColor:color];
-            config.supportsAlpha = NO;
-            picker.configuration = config;
+            picker.selectedColor = liveScrubberUIColor() ?: [UIColor redColor];
+            picker.supportsAlpha = NO;
             [[%c(YTUIUtils) topViewControllerForPresenting] presentViewController:picker animated:YES completion:nil];
             return YES;
         }];
